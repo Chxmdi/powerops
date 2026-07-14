@@ -1,14 +1,14 @@
-// Run-trace ticker — cycles through the real lifecycle states. Illustrative, labeled as such.
+// Run-trace ticker: cycles through the real lifecycle states. Illustrative, labeled as such.
 (function(){
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var el = document.getElementById('traceLine');
   if(!el || reduced) return;
   var frames = [
-    { t:'t+00.0s', m:'run_0142 · genset_2 fuel-flow anomaly',        s:'PROPOSED',          ok:false },
-    { t:'t+00.2s', m:'run_0142 · plan written · queued for operator', s:'PENDING_APPROVAL',  ok:false },
-    { t:'t+41.8s', m:'run_0142 · operator closed the gate',           s:'APPROVED',          ok:false },
-    { t:'t+42.1s', m:'run_0142 · dispatch recorded, command sent',    s:'EXECUTING',         ok:false },
-    { t:'t+47.6s', m:'run_0142 · device state read back — matches',   s:'VERIFIED ✓',        ok:true  }
+    { t:'t+00.0s', m:'run_0142 · genset_2 fuel-flow anomaly', s:'PROPOSED', ok:false },
+    { t:'t+00.2s', m:'run_0142 · plan written · queued for operator', s:'PENDING_APPROVAL', ok:false },
+    { t:'t+41.8s', m:'run_0142 · operator closed the gate', s:'APPROVED', ok:false },
+    { t:'t+42.1s', m:'run_0142 · dispatch recorded, command sent', s:'EXECUTING', ok:false },
+    { t:'t+47.6s', m:'run_0142 · device state read back, matches', s:'VERIFIED ✓', ok:true }
   ];
   var i = 0;
   setInterval(function(){
