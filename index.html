@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PowerOps — agentic control for real energy hardware · Blessed Okelekwe</title>
+<title>PowerOps: agentic control for real energy hardware · Blessed Okelekwe</title>
 <meta name="description" content="PowerOps is a solo-built agent platform that monitors commercial & industrial energy sites over Modbus and gates every hardware action behind human approval. Built by Blessed Okelekwe.">
-<meta property="og:title" content="PowerOps — agentic control for real energy hardware">
-<meta property="og:description" content="An LLM agent with its hand on real power equipment — and a human between every decision and the breaker.">
+<meta property="og:title" content="PowerOps: agentic control for real energy hardware">
+<meta property="og:description" content="An LLM agent with its hand on real power equipment, with a human between every decision and the breaker.">
 <link rel="preconnect" href="https://api.fontshare.com">
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@500,600&f[]=general-sans@400,500,600&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,15 +15,98 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="topbar"><div class="wrap"><a class="wordmark" href="#top"><span class="phasebar" aria-hidden="true"><i></i><i></i><i></i></span>POWEROPS</a><nav class="topnav" aria-label="Sections"><a href="#arch">ARCHITECTURE</a><a href="#problem">THE HARD PROBLEM</a><a href="#built">WHAT I BUILT</a></nav><a class="btn btn-primary" href="https://github.com/Chxmdi/powerops">View the code ↗</a></div></header>
+<header class="topbar">
+  <div class="wrap">
+    <a class="wordmark" href="#top"><span class="phasebar" aria-hidden="true"><i></i><i></i><i></i></span>POWEROPS</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#arch">ARCHITECTURE</a>
+      <a href="#problem">THE HARD PROBLEM</a>
+      <a href="#built">WHAT I BUILT</a>
+    </nav>
+  </div>
+</header>
 <main id="top">
-<section class="hero"><div class="wrap"><p class="eyebrow"><span class="phasebar" aria-hidden="true"><i></i><i></i><i></i></span> AGENT PLATFORM · REAL HARDWARE · SOLO-BUILT</p><h1>Agents that act on real power hardware — with a human between every decision and <span class="gate-word">the&nbsp;breaker</span>.</h1><p class="hero-sub">PowerOps monitors commercial &amp; industrial energy sites in Nigeria over Modbus, reasons about what it sees, and proposes interventions. Nothing executes until a person approves it — and a restart never re-fires a command.</p><div class="hero-ctas"><a class="btn btn-primary" href="https://github.com/Chxmdi/powerops">View the code ↗</a><a class="btn btn-ghost" href="#arch">Read the architecture ↓</a></div><div class="trace" aria-label="Illustrative run trace"><div class="trace-head"><span class="trace-dot" aria-hidden="true"></span>RUN TRACE · ILLUSTRATIVE — STATES SHOWN ARE THE REAL LIFECYCLE</div><div class="trace-body"><div class="trace-line" id="traceLine"><span class="t">t+00.0s</span><span>run_0142 · genset_2 fuel-flow anomaly</span><span class="state">PROPOSED</span></div></div></div></div></section>
-<section class="section"><div class="wrap"><p class="sec-eyebrow reveal">THE 45-SECOND VERSION</p><h2 class="reveal">What it is, how it works, and why it was hard.</h2><div class="grid-3"><article class="card reveal" style="--tagc:var(--l3-blue)"><p class="card-tag">WHAT</p><h3>Monitoring &amp; control for distributed energy assets</h3><p>Generators, inverters, and meters at commercial &amp; industrial sites in Nigeria. <strong>Telemetry comes in over Modbus</strong>; decisions go out through an approval queue.</p></article><article class="card reveal" style="--tagc:var(--l2-amber)"><p class="card-tag">HOW</p><h3>An MCP server puts the site in the agent's hands</h3><p>The MCP server exposes telemetry and control tools to an LLM agent. The agent detects anomalies, plans an intervention, and <strong>files it for human sign-off</strong> in a React dashboard. Prometheus and Grafana watch the watcher.</p></article><article class="card reveal" style="--tagc:var(--l1-red)"><p class="card-tag">WHY IT'S HARD</p><h3>Crashes meet physical actuators</h3><p>The hard problem isn't getting an agent to call tools. It's guaranteeing a crashed run <strong>resumes instead of re-firing a command</strong> at a device controlling real equipment. Run state lives in PostgreSQL, not in memory.</p></article></div></div></section>
-<section class="section" id="arch"><div class="wrap"><p class="sec-eyebrow reveal">ARCHITECTURE</p><h2 class="reveal">Drawn as a one-line diagram, because that's how it behaves.</h2><p class="sec-sub reveal">The approval gate is rendered the way electricians render it: a normally-open breaker between the agent and the hardware. Current — a command — only flows when a human closes it.</p><div class="schematic reveal"><object class="architecture-diagram" data="architecture.svg" type="image/svg+xml" aria-label="PowerOps one-line architecture diagram"></object><div class="legend"><span><i class="swatch" style="border-color:var(--l3-blue)"></i> telemetry &amp; tool reads</span><span><i class="swatch dashed" style="border-color:var(--l2-amber)"></i> proposed — no effect yet</span><span><i class="swatch" style="border-color:var(--l1-red)"></i> approved command to hardware</span><span><i class="swatch dashed" style="border-color:var(--faint)"></i> metrics tap</span></div></div></div></section>
-<section class="section" id="problem"><div class="wrap"><p class="sec-eyebrow reveal">THE HARD PROBLEM</p><h2 class="reveal">Restarts must never re-fire hardware commands.</h2><p class="sec-sub reveal">A stateless agent that crashes mid-run and replays its plan is an inconvenience when it's calling a search API. It's an incident when it's talking to a generator. Every PowerOps run is a state machine persisted to PostgreSQL — each transition is recorded, so recovery knows what was proposed, what was approved, and what was already dispatched, and resumes from there instead of starting over.</p><div class="sm reveal" role="list" aria-label="Run lifecycle"><div class="sm-node" role="listitem"><p class="sm-step">01</p><p class="sm-name">PROPOSED</p><p class="sm-note">Agent detects an anomaly and writes a plan. No side effects.</p></div><div class="sm-node gate" role="listitem"><p class="sm-step">02</p><p class="sm-name">PENDING_APPROVAL</p><p class="sm-note">Sits in the operator's queue. The gate is open.</p></div><div class="sm-node gate" role="listitem"><p class="sm-step">03</p><p class="sm-name">APPROVED</p><p class="sm-note">A human closed the gate. Rejection ends the run here instead.</p></div><div class="sm-node exec" role="listitem"><p class="sm-step">04</p><p class="sm-name">EXECUTING</p><p class="sm-note">Dispatch is recorded before the command leaves — recovery can tell "planned" from "sent".</p></div><div class="sm-node done" role="listitem"><p class="sm-step">05</p><p class="sm-name">VERIFIED</p><p class="sm-note">The device's state is read back and confirmed against intent.</p></div></div><div class="guarantees"><article class="card reveal" style="--tagc:var(--l2-amber)"><p class="card-tag">GUARANTEE</p><h3>Approval is structural, not cosmetic</h3><p>The execution path is blocked until a human approves. The agent's tool surface lets it <strong>propose — never dispatch</strong>.</p></article><article class="card reveal" style="--tagc:var(--l1-red)"><p class="card-tag">GUARANTEE</p><h3>Runs resume, commands don't repeat</h3><p>Run state is durable in Postgres. A crash mid-run resumes from the last recorded transition — <strong>it never replays a dispatched command</strong>.</p></article><article class="card reveal" style="--tagc:var(--l3-blue)"><p class="card-tag">GUARANTEE</p><h3>The agent is observable</h3><p>Prometheus counters and Grafana dashboards cover the loop — <strong>proposals, approvals, rejections, outcomes</strong> — so trust is inspectable, not assumed.</p></article></div><div class="cta-band reveal"><a class="btn btn-primary" href="https://github.com/Chxmdi/powerops">See how it's implemented ↗</a></div></div></section>
-<section class="section" id="built"><div class="wrap"><p class="sec-eyebrow reveal">AUTHORSHIP</p><h2 class="reveal">What I personally built: all of it.</h2><p class="sec-sub reveal">PowerOps is a solo project — every layer below is mine, end to end.</p><div class="built-list"><div class="built-row reveal" style="--rowc:var(--l2-amber)"><p class="built-name">AGENT CORE + MCP</p><p>The MCP server and the tool surface the agent works through — telemetry reads, action proposals, run lifecycle. Designed so the most an agent can ever do on its own is ask.</p></div><div class="built-row reveal" style="--rowc:var(--l1-red)"><p class="built-name">CONTROL PLANE</p><p>The Express API and Modbus integration that actually talk to devices in the field — the only component allowed to touch hardware, and only with an approved run behind it.</p></div><div class="built-row reveal" style="--rowc:var(--l3-blue)"><p class="built-name">DATA LAYER</p><p>The PostgreSQL schema carrying telemetry, persisted run state, and the approvals ledger — the source of truth that makes crash recovery boring.</p></div><div class="built-row reveal" style="--rowc:var(--l2-amber)"><p class="built-name">OPERATOR DASHBOARD</p><p>The React/Vite frontend: the approval queue where humans close the gate, plus per-site views of what the agent is seeing and doing.</p></div><div class="built-row reveal" style="--rowc:var(--l3-blue)"><p class="built-name">OBSERVABILITY</p><p>Prometheus metrics and Grafana dashboards across the whole loop, so the agent's behavior is a graph you can look at, not a vibe.</p></div></div><div class="origin reveal"><p><strong>Where it comes from:</strong> PowerOps grew out of FloWiser, a commercial-energy venture I co-founded in Nigeria. The problem is real and so is the hardware — which is why the platform is built around approval gates and resumable runs rather than a demo loop.</p></div><div class="chips reveal" aria-label="Stack"><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">MCP</span><span class="chip">PostgreSQL</span><span class="chip">React</span><span class="chip">Vite</span><span class="chip">Prometheus</span><span class="chip">Grafana</span><span class="chip">Modbus</span></div></div></section>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow"><span class="phasebar" aria-hidden="true"><i></i><i></i><i></i></span> AGENT PLATFORM · REAL HARDWARE · SOLO-BUILT</p>
+      <h1>Agents that act on real power hardware, with a human between every decision and <span class="gate-word">the&nbsp;breaker</span>.</h1>
+      <p class="hero-sub">PowerOps monitors commercial &amp; industrial energy sites in Nigeria over Modbus, reasons about what it sees, and proposes interventions. Nothing executes until a person approves it. A restart never re-fires a command.</p>
+      <div class="hero-ctas"><a class="btn btn-ghost" href="#arch">Read the architecture ↓</a></div>
+      <div class="trace" aria-label="Illustrative run trace">
+        <div class="trace-head"><span class="trace-dot" aria-hidden="true"></span>RUN TRACE · ILLUSTRATIVE: STATES SHOWN ARE THE REAL LIFECYCLE</div>
+        <div class="trace-body"><div class="trace-line" id="traceLine"><span class="t">t+00.0s</span><span>run_0142 · genset_2 fuel-flow anomaly</span><span class="state">PROPOSED</span></div></div>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <p class="sec-eyebrow reveal">THE 45-SECOND VERSION</p>
+      <h2 class="reveal">What it is, how it works, and why it was hard.</h2>
+      <div class="grid-3">
+        <article class="card reveal" style="--tagc:var(--l3-blue)"><p class="card-tag">WHAT</p><h3>Monitoring &amp; control for distributed energy assets</h3><p>Generators, inverters, and meters at commercial &amp; industrial sites in Nigeria. <strong>Telemetry comes in over Modbus</strong>; decisions go out through an approval queue.</p></article>
+        <article class="card reveal" style="--tagc:var(--l2-amber)"><p class="card-tag">HOW</p><h3>An MCP server puts the site in the agent's hands</h3><p>The MCP server exposes telemetry and control tools to an LLM agent. The agent detects anomalies, plans an intervention, and <strong>files it for human sign-off</strong> in a React dashboard. Prometheus and Grafana watch the watcher.</p></article>
+        <article class="card reveal" style="--tagc:var(--l1-red)"><p class="card-tag">WHY IT'S HARD</p><h3>Crashes meet physical actuators</h3><p>The hard problem isn't getting an agent to call tools. It's guaranteeing a crashed run <strong>resumes instead of re-firing a command</strong> at a device controlling real equipment. Run state lives in PostgreSQL, not in memory.</p></article>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="arch">
+    <div class="wrap">
+      <p class="sec-eyebrow reveal">ARCHITECTURE</p>
+      <h2 class="reveal">Drawn as a one-line diagram, because that's how it behaves.</h2>
+      <p class="sec-sub reveal">The approval gate is rendered the way electricians render it: a normally-open breaker between the agent and the hardware. A command only flows when a human closes it.</p>
+      <div class="schematic reveal">
+        <object class="architecture-diagram" data="architecture.svg" type="image/svg+xml" aria-label="PowerOps one-line architecture diagram"></object>
+        <div class="legend">
+          <span><i class="swatch" style="border-color:var(--l3-blue)"></i> telemetry &amp; tool reads</span>
+          <span><i class="swatch dashed" style="border-color:var(--l2-amber)"></i> proposed, no effect yet</span>
+          <span><i class="swatch" style="border-color:var(--l1-red)"></i> approved command to hardware</span>
+          <span><i class="swatch dashed" style="border-color:var(--faint)"></i> metrics tap</span>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="problem">
+    <div class="wrap">
+      <p class="sec-eyebrow reveal">THE HARD PROBLEM</p>
+      <h2 class="reveal">Restarts must never re-fire hardware commands.</h2>
+      <p class="sec-sub reveal">A stateless agent that crashes mid-run and replays its plan is an inconvenience when it's calling a search API. It's an incident when it's talking to a generator. Every PowerOps run is a state machine persisted to PostgreSQL. Each transition is recorded, so recovery knows what was proposed, what was approved, and what was already dispatched, and resumes from there instead of starting over.</p>
+      <div class="sm reveal" role="list" aria-label="Run lifecycle">
+        <div class="sm-node" role="listitem"><p class="sm-step">01</p><p class="sm-name">PROPOSED</p><p class="sm-note">Agent detects an anomaly and writes a plan. No side effects.</p></div>
+        <div class="sm-node gate" role="listitem"><p class="sm-step">02</p><p class="sm-name">PENDING_APPROVAL</p><p class="sm-note">Sits in the operator's queue. The gate is open.</p></div>
+        <div class="sm-node gate" role="listitem"><p class="sm-step">03</p><p class="sm-name">APPROVED</p><p class="sm-note">A human closed the gate. Rejection ends the run here instead.</p></div>
+        <div class="sm-node exec" role="listitem"><p class="sm-step">04</p><p class="sm-name">EXECUTING</p><p class="sm-note">Dispatch is recorded before the command leaves, so recovery can tell "planned" from "sent".</p></div>
+        <div class="sm-node done" role="listitem"><p class="sm-step">05</p><p class="sm-name">VERIFIED</p><p class="sm-note">The device's state is read back and confirmed against intent.</p></div>
+      </div>
+      <div class="guarantees">
+        <article class="card reveal" style="--tagc:var(--l2-amber)"><p class="card-tag">GUARANTEE</p><h3>Approval is structural, not cosmetic</h3><p>The execution path is blocked until a human approves. The agent's tool surface lets it <strong>propose, never dispatch</strong>.</p></article>
+        <article class="card reveal" style="--tagc:var(--l1-red)"><p class="card-tag">GUARANTEE</p><h3>Runs resume, commands don't repeat</h3><p>Run state is durable in Postgres. A crash mid-run resumes from the last recorded transition. <strong>It never replays a dispatched command</strong>.</p></article>
+        <article class="card reveal" style="--tagc:var(--l3-blue)"><p class="card-tag">GUARANTEE</p><h3>The agent is observable</h3><p>Prometheus counters and Grafana dashboards cover the loop, including <strong>proposals, approvals, rejections, and outcomes</strong>, so trust is inspectable, not assumed.</p></article>
+      </div>
+    </div>
+  </section>
+  <section class="section" id="built">
+    <div class="wrap">
+      <p class="sec-eyebrow reveal">AUTHORSHIP</p>
+      <h2 class="reveal">What I personally built: all of it.</h2>
+      <p class="sec-sub reveal">PowerOps is a solo project. Every layer below is mine, end to end.</p>
+      <div class="built-list">
+        <div class="built-row reveal" style="--rowc:var(--l2-amber)"><p class="built-name">AGENT CORE + MCP</p><p>The MCP server and the tool surface the agent works through: telemetry reads, action proposals, run lifecycle. Designed so the most an agent can ever do on its own is ask.</p></div>
+        <div class="built-row reveal" style="--rowc:var(--l1-red)"><p class="built-name">CONTROL PLANE</p><p>The Express API and Modbus integration that actually talk to devices in the field. It is the only component allowed to touch hardware, and only with an approved run behind it.</p></div>
+        <div class="built-row reveal" style="--rowc:var(--l3-blue)"><p class="built-name">DATA LAYER</p><p>The PostgreSQL schema carrying telemetry, persisted run state, and the approvals ledger. It is the source of truth that makes crash recovery boring.</p></div>
+        <div class="built-row reveal" style="--rowc:var(--l2-amber)"><p class="built-name">OPERATOR DASHBOARD</p><p>The React/Vite frontend: the approval queue where humans close the gate, plus per-site views of what the agent is seeing and doing.</p></div>
+        <div class="built-row reveal" style="--rowc:var(--l3-blue)"><p class="built-name">OBSERVABILITY</p><p>Prometheus metrics and Grafana dashboards across the whole loop, so the agent's behavior is a graph you can look at, not a vibe.</p></div>
+      </div>
+      <div class="origin reveal"><p><strong>Where it comes from:</strong> PowerOps grew out of FloWiser, a commercial-energy venture I co-founded in Nigeria. The problem is real and so is the hardware. That is why the platform is built around approval gates and resumable runs rather than a demo loop.</p></div>
+      <div class="chips reveal" aria-label="Stack"><span class="chip">Node.js</span><span class="chip">Express</span><span class="chip">MCP</span><span class="chip">PostgreSQL</span><span class="chip">React</span><span class="chip">Vite</span><span class="chip">Prometheus</span><span class="chip">Grafana</span><span class="chip">Modbus</span></div>
+    </div>
+  </section>
 </main>
-<footer><div class="wrap"><p class="foot-id"><span class="phasebar" aria-hidden="true" style="margin-right:12px"><i></i><i></i><i></i></span><strong>BLESSED (CHIMDINDU) OKELEKWE</strong> · Software engineer · Montréal</p><nav class="foot-links" aria-label="Contact"><a href="https://github.com/Chxmdi">GitHub</a><a href="https://www.linkedin.com/in/chimdindu-okelekwe-6857ba20a/">LinkedIn</a><a href="mailto:ookelekwe@gmail.com">Email</a></nav></div></footer>
+<footer>
+  <div class="wrap">
+    <p class="foot-id"><span class="phasebar" aria-hidden="true" style="margin-right:12px"><i></i><i></i><i></i></span><strong>BLESSED (CHIMDINDU) OKELEKWE</strong> · Software engineer · Montréal</p>
+    <nav class="foot-links" aria-label="Contact"><a href="https://github.com/Chxmdi">GitHub</a><a href="https://www.linkedin.com/in/chimdindu-okelekwe-6857ba20a/">LinkedIn</a><a href="mailto:ookelekwe@gmail.com">Email</a></nav>
+  </div>
+</footer>
 <script src="script.js"></script>
 </body>
 </html>
